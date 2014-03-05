@@ -6,7 +6,8 @@
   "author": "Aluísio Augusto Silva Gonçalves <aluisio@aasg.name>",
   "main": "multiglob.js",
   "scripts": {
-    "prepublish": "lsc -c multiglob.ls"
+    "prepublish": "lsc -c multiglob.ls",
+    "test": "mocha --compilers ls:LiveScript --reporter spec tests.ls"
   },
   "keywords": [
     "glob"
@@ -15,6 +16,9 @@
     "glob": "~3 >=3.2.9"
   },
   "devDependencies": {
-    "LiveScript": "~1 >=1.2.0"
+    "LiveScript": "~1 >=1.2.0",
+    "mocha": "~1 >= 1.17.1",
+    "chai": "~1 >= 1.9.0",
+    "mock-fs": "~2 >=2.2.0"
   }
 }
