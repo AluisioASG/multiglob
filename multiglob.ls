@@ -15,6 +15,10 @@ multiglob = (options, ...patterns) ->
   # Always perform the globbing synchronously.
   options.sync = true
 
+  # Work around isaacs/node-glob#62 by matching the whole tree first.
+  if patterns[0]?[0] is '!'
+    patterns.unshift '**/*'
+
   results = []
   for pattern in patterns
     # Remove the operation flag from the pattern, defaulting to
