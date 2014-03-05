@@ -6,11 +6,11 @@ difference   = (a, b) -> a.filter (not in b)
 union        = (a, b) -> (a ++ b).filter (e, i, arr) -> (arr.indexOf e) is i
 
 
-multiglob = (options, ...patterns) ->
+multiglob = (...patterns, options) ->
   if typeof! options is \String
     # `options` is actually a pattern; use the default options and
     # add `options` to the patterns.
-    patterns.unshift options
+    patterns.push options
     options = {}
   # Always perform the globbing synchronously.
   options.sync = true

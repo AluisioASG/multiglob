@@ -53,7 +53,7 @@ describe "multiglob" !->
         package.json
       ]>
     this "match a single negated pattern" !->
-      results = multiglob.sync {mark: true} '!**/*.js'
+      results = multiglob.sync '!**/*.js' mark: true
       expect results .not.to.be.empty
 
       results .= sort!
