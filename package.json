@@ -1,0 +1,20 @@
+{
+  "name": "multiglob",
+  "version": "0.1.0",
+  "description": "yet another multi-match wrapper for glob",
+  "license": "MPL-2.0",
+  "author": "Aluísio Augusto Silva Gonçalves <aluisio@aasg.name>",
+  "main": "multiglob.js",
+  "scripts": {
+    "prepublish": "lsc -c multiglob.ls"
+  },
+  "keywords": [
+    "glob"
+  ],
+  "dependencies": {
+    "glob": "~3 >=3.2.9"
+  },
+  "devDependencies": {
+    "LiveScript": "~1 >=1.2.0"
+  }
+}

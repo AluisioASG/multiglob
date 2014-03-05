@@ -1,0 +1,9 @@
+# Build artifacts
+*.js
+
+# Third-party components
+/node_modules/
+
+# Editor files
+*~
+*.swp

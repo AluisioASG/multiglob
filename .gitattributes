@@ -1,0 +1,13 @@
+# This file is used to set up line ending normalization.  We begin
+# by specifying that files not mentioned here should not be touched.
+* -text
+
+# Now we mark the .git* files and other non-source text files at the
+# root of the repository.
+/.git* text
+/package.json text
+/LICENSE text
+/*.md text
+
+# Finally, we tag our source code files.
+*.ls text
