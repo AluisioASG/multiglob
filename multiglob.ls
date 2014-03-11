@@ -14,6 +14,8 @@ multiglob = (...patterns, options) ->
     options = {}
   # Always perform the globbing synchronously.
   options.sync = true
+  # Ignore comments.
+  options.nocomment = false
 
   # Work around isaacs/node-glob#62 by matching the whole tree first.
   if patterns[0]?[0] is '!'
@@ -23,7 +25,7 @@ multiglob = (...patterns, options) ->
   for pattern in patterns
     # Remove the operation flag from the pattern, defaulting to
     # inclusion if it's not specified.
-    if pattern[0] in <[! + &]>
+    if pattern[0] in <[! + & #]>
       [flag, pattern] = [pattern[0], pattern.substr 1]
     else
       flag = '+'
@@ -32,6 +34,7 @@ multiglob = (...patterns, options) ->
     options.cache = result.cache
     # Process the matches.
     results = switch flag
+    | '#' => results
     | '!' => results `difference` result.found
     | '+' => results `union` result.found
     | '&' => results `intersection` result.found

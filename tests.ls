@@ -99,6 +99,16 @@ describe "multiglob" !->
       expect results .to.deep.equal <[
         index.ls
       ]>
+    this "ignore comments" !->
+      results = multiglob.sync '#**/*.js' '**/*.ls' '#node_modules/**'
+      expect results .not.to.be.empty
+
+      results .= sort!
+      expect results .to.deep.equal <[
+        index.ls
+        lib/match.ls
+        lib/testdata.json.ls
+      ]>
 
   # Test properties.
   describe "does" as !->
