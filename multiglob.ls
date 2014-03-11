@@ -3,7 +3,7 @@ require! glob
 # Array operation helpers.
 intersection = (a, b) -> a.filter (in b)
 difference   = (a, b) -> a.filter (not in b)
-union        = (a, b) -> (a ++ b).filter (e, i, arr) -> (arr.indexOf e) is i
+union        = (a, b) -> a.concat difference b, a
 
 
 multiglob = (...patterns, options) ->
