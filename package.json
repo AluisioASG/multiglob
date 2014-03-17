@@ -1,6 +1,6 @@
 {
   "name": "multiglob",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "yet another multi-match wrapper for glob",
   "license": "MPL-2.0",
   "author": "Aluísio Augusto Silva Gonçalves <aluisio@aasg.name>",
