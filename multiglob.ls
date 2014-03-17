@@ -50,19 +50,16 @@ multiglob-async = (inputs, options) ->
   # Force asynchronous operation.
   options.sync = false
   # Perform all the globbings simultaneously.
-  outputs = for let [flag, pattern] in inputs
-    deferred = Q.defer!
+  outputs = inputs.map ([flag, pattern]) ->
+    resolve, reject <-! Q.Promise
     glob pattern, options, (err, matches) !->
-      switch
-      | err? => deferred.reject err
-      | _    => deferred.resolve [flag, matches]
-    deferred.promise
+      | err? => reject err
+      | _    => resolve [flag, matches]
 
   # Then collect the results and join the matches.
-  Q.all outputs .then (results) ->
-    results.reduce (result, [flag, matches]) ->
-      return add-matches result, flag, matches
-    , []
+  Q.all outputs .invoke \reduce (result, [flag, matches]) ->
+    return add-matches result, flag, matches
+  , []
   # Return a promise for the matches.
 
 multiglob-sync = (inputs, options) ->
