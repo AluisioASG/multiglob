@@ -27,10 +27,14 @@ process-input = (patterns, options={}) ->
       throw new Error "pattern is an empty string"
 
     flag = pattern[0]
-    if flag in <[! + &]>
-      [flag, pattern.substr 1]
-    else if flag isnt '#'
-      ['+', pattern]
+    if flag in <[+ & !]>
+      operation = switch flag
+      | '+' => union
+      | '!' => difference
+      | '&' => intersection
+      [operation, pattern.substr 1]
+    else if flag isnt \#
+      [union, pattern]
 
   # This is not a library's call to make.
   options.silent ?= true
@@ -38,35 +42,27 @@ process-input = (patterns, options={}) ->
   # Return the processed options.
   return [inputs, options]
 
-# Join the accumulated glob matches and the ones given in the way
-# specified by the operation flag.
-add-matches = (results-so-far, operation-flag, matches) ->
-  switch operation-flag
-  | '+' => results-so-far     `union`    matches
-  | '!' => results-so-far  `difference`  matches
-  | '&' => results-so-far `intersection` matches
-
 multiglob-async = (inputs, options) ->
   # Perform all the globbings simultaneously.
-  outputs = inputs.map ([flag, pattern]) ->
+  outputs = inputs.map ([operation, pattern]) ->
     resolve, reject <-! Q.Promise
     glob pattern, options, (err, matches) !->
       | err? => reject err
-      | _    => resolve [flag, matches]
+      | _    => resolve [operation, matches]
 
   # Then collect the results and join the matches.
-  Q.all outputs .invoke \reduce (result, [flag, matches]) ->
-    return add-matches result, flag, matches
+  Q.all outputs .invoke \reduce (result, [operation, matches]) ->
+    return operation result, matches
   , []
   # Return a promise for the matches.
 
 multiglob-sync = (inputs, options) ->
   # Perform the globbings in the order the patterns are specified,
   # sharing glob's path cache between calls.
-  inputs.reduce (result, [flag, pattern]) ->
+  inputs.reduce (result, [operation, pattern]) ->
     glob-result = new glob.Glob pattern, options
     options.cache = glob-result.cache
-    return add-matches result, flag, glob-result.found
+    return operation result, glob-result.found
   , []
   # Return the list of matches.
 
