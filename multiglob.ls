@@ -47,8 +47,6 @@ add-matches = (results-so-far, operation-flag, matches) ->
   | '&' => results-so-far `intersection` matches
 
 multiglob-async = (inputs, options) ->
-  # Force asynchronous operation.
-  options.sync = false
   # Perform all the globbings simultaneously.
   outputs = inputs.map ([flag, pattern]) ->
     resolve, reject <-! Q.Promise
@@ -63,8 +61,6 @@ multiglob-async = (inputs, options) ->
   # Return a promise for the matches.
 
 multiglob-sync = (inputs, options) ->
-  # Force synchronous operation.
-  options.sync = true
   # Perform the globbings in the order the patterns are specified,
   # sharing glob's path cache between calls.
   inputs.reduce (result, [flag, pattern]) ->
@@ -75,19 +71,19 @@ multiglob-sync = (inputs, options) ->
   # Return the list of matches.
 
 
-# Thrown when the `sync` option passed through the `options` object
-# explicitly conflicts with the function being called.
-class ConflictingOperationModeError extends Error
-  name: \ConflictingOperationModeError
-  (expected-state) ->
-    super!
-    [function-mode, option-state] = switch expected-state
-    | \sync  => [ 'synchronous'  'false' ]
-    | \async => [ 'asynchronous' 'true'  ]
-    @message = "
-      `sync` option set to #{option-state} but calling #{function-mode}
+# Check if `options.sync`, if set, does not conflict with the caller's
+# operation mode (sync or async), then set it to the expected value.
+set-sync-option = (function-mode, options) !->
+  expected-option-state = switch function-mode
+  | 'synchronous'  => true
+  | 'asynchronous' => false
+  if options.sync is !expected-option-state
+    throw new Error "
+      `sync` option set to #{options.sync} but calling #{function-mode}
       version of multiglob
     "
+  options.sync = expected-option-state
+
 
 module.exports =
 
@@ -98,13 +94,9 @@ module.exports =
     if typeof! args[*-1] isnt \String
       # Options provided
       options = args.pop!
-    else
-      options = {}
-    # Make sure the `sync` flag isn't explicitly set to `true`.
-    if options.sync is true
-      throw new ConflictingOperationModeError \async
 
     [inputs, options] = process-input args, options
+    set-sync-option \asynchronous options
     promise = multiglob-async inputs, options
     if callback?
       promise.then (callback null, _), callback
@@ -115,11 +107,7 @@ module.exports =
     if typeof! args[*-1] isnt \String
       # Options provided
       options = args.pop!
-    else
-      options = {}
-    # Make sure the `sync` flag isn't explicitly set to `false`.
-    if options.sync is false
-      throw new ConflictingOperationModeError \sync
 
     [inputs, options] = process-input args, options
+    set-sync-option \synchronous options
     multiglob-sync inputs, options
