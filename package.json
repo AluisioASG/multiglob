@@ -12,6 +12,11 @@
   "keywords": [
     "glob"
   ],
+  "bugs": "https://github.com/AluisioASG/multiglob/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AluisioASG/multiglob.git"
+  },
   "dependencies": {
     "glob": "~3 >=3.2.9",
     "q": "~1"
