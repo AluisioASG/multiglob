@@ -44,20 +44,14 @@ describe "multiglob" !->
   describe "can" as !->
     this "match a single pattern" !->
       results = multiglob.sync '**/*.json'
-      expect results .not.to.be.empty
-
-      results .= sort!
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         lib/testdata.json
         node_modules/lib1/package.json
         package.json
       ]>
     this "match a single negated pattern" !->
       results = multiglob.sync '!**/*.js' mark: true
-      expect results .not.to.be.empty
-
-      results .= sort!
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         bin/
         bin/script
         index.ls
@@ -75,10 +69,7 @@ describe "multiglob" !->
       ]>
     this "match multiple patterns inclusively (addition)" !->
       results = multiglob.sync '**/*.js' '*.ls'
-      expect results .not.to.be.empty
-
-      results .= sort!
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         index.ls
         lib/glob.js
         lib/match.js
@@ -87,24 +78,17 @@ describe "multiglob" !->
       ]>
     this "select previous results matching a pattern" !->
       results = multiglob.sync '**/index.*' '&node_modules/**'
-      expect results .not.to.be.empty
-
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         node_modules/lib1/index.js
       ]>
     this "exclude previous results matching a pattern" !->
       results = multiglob.sync '**/index.*' '!node_modules/**'
-      expect results .not.to.be.empty
-
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         index.ls
       ]>
     this "ignore comments" !->
       results = multiglob.sync '#**/*.js' '**/*.ls' '#node_modules/**'
-      expect results .not.to.be.empty
-
-      results .= sort!
-      expect results .to.deep.equal <[
+      expect results .to.have.members <[
         index.ls
         lib/match.ls
         lib/testdata.json.ls
