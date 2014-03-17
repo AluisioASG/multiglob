@@ -14,6 +14,10 @@ NotImplemented = !->
 # defining test cases.
 as = (.bind global['it'])
 
+# Allow us to pass a function reference to `beforeEach` when defining
+# empty filesystems.
+mockEmptyFS = !-> mock {}
+
 
 describe "multiglob" !->
   beforeEach !->
@@ -105,7 +109,6 @@ describe "multiglob" !->
       # by its own negation.
       results = multiglob.sync '**/*.js' '!**/*.js'
       expect results .to.exist.and.to.be.empty
-
     this "return a single instance of each match" !->
       results = multiglob.sync 'lib/*' '**/.*ls' '**/*.js'
       expect results .not.to.be.empty
@@ -128,19 +131,69 @@ describe "multiglob" !->
       expect jsIndex .to.be.below coffeeIndex
       expect jsIndex .not.to.be.closeTo coffeeIndex, 1
 
-describe "multiglob.async" as !->
-  beforeEach !->
-    mock {}
-  afterEach !->
-    mock.restore!
+describe "multiglob.sync" as !->
+  # Most of time we just want to test the result chain.
+  beforeEach mockEmptyFS
+  afterEach mock.restore
 
-  this "sends errors to the callback function" (done) !->
-    multiglob '' (err, results) !->
+  this "throws invocation errors" !->
+    # Passing an empty pattern makes glob throw.
+    expect (!-> multiglob.async '') .to.throw
+    # Passing a conflicting `sync` option makes multiglob throw.
+    expect (!-> multiglob.async '*', sync: true) .to.throw
+  this "throws filesystem traversal errors" !->
+    mock do
+      '.git': mock.directory do
+        # Make sure the directory would be unreadable for the user.
+        uid: (process.getuid?! ? 0) + 1
+        gid: (process.getgid?! ? 0) + 1
+        mode: 8~700
+        items:
+          'config': ''
+          'objects': {}
+    expect (!-> multiglob.sync '.git/**') .to.throw
+  this "returns the matches" !->
+    results = multiglob.sync '**'
+    expect results .to.be.an \array
+
+describe "multiglob.async" as !->
+  # Most of time we just want to test the result chain.
+  beforeEach mockEmptyFS
+  afterEach mock.restore
+
+  this "throws invocation errors" !->
+    # Passing an empty pattern makes glob throw.
+    expect (!-> multiglob.async '') .to.throw
+    # Passing a conflicting `sync` option makes multiglob throw.
+    expect (!-> multiglob.async '*', sync: true) .to.throw
+  this "sends filesystem traversal errors to the callback function" (done) !->
+    mock do
+      '.git': mock.directory do
+        # Make sure the directory would be unreadable for the user.
+        uid: (process.getuid?! ? 0) + 1
+        gid: (process.getgid?! ? 0) + 1
+        mode: 8~700
+        items:
+          'config': ''
+          'objects': {}
+    multiglob.async '.git/**' (err, results) !->
       expect results .to.not.exist
       expect err .to.exist
       done!
   this "sends results to the callback function" (done) !->
-    multiglob '**' (err, results) !->
+    multiglob.async '**' (err, results) !->
       expect results .to.exist
       expect err .to.not.exist
       done!
+  this "with no callback returns a promise for the matches" (done) !->
+    multiglob.async '*'
+    .then (value) !->
+      expect value .to.be.an \array
+    .then done, done
+  this "with a callback returns a promise for the callback" (done) !->
+    multiglob.async '*' (err) ->
+      throw err if err?
+      return 1013
+    .then (value) !->
+      expect value .to.equal 1013
+    .then done, done

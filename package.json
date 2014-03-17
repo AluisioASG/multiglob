@@ -13,7 +13,8 @@
     "glob"
   ],
   "dependencies": {
-    "glob": "~3 >=3.2.9"
+    "glob": "~3 >=3.2.9",
+    "q": "~1"
   },
   "devDependencies": {
     "LiveScript": "~1 >=1.2.0",
