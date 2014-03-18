@@ -1,3 +1,6 @@
+# 0.2.1
+* Replaced `kriskowal/q` with `then/promise` as the promise implementation
+
 # 0.2.0
 * Made `multiglob.async` return a promise for either the list of matches or the result of the callback function
 * Renamed the asynchronous multiglob function to `multiglob.async`
