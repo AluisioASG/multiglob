@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "glob": "~3 >=3.2.9",
-    "q": "~1"
+    "promise": "~4"
   },
   "devDependencies": {
     "LiveScript": "~1 >=1.2.0",

@@ -1,5 +1,5 @@
 require! glob
-require! Q: q
+require! Promise: promise
 
 # Array operation helpers.
 intersection = (a, b) -> a.filter (in b)
@@ -45,13 +45,13 @@ process-input = (patterns, options={}) ->
 multiglob-async = (inputs, options) ->
   # Perform all the globbings simultaneously.
   outputs = inputs.map ([operation, pattern]) ->
-    resolve, reject <-! Q.Promise
+    resolve, reject <-! new Promise _
     glob pattern, options, (err, matches) !->
       | err? => reject err
       | _    => resolve [operation, matches]
 
   # Then collect the results and join the matches.
-  Q.all outputs .invoke \reduce (result, [operation, matches]) ->
+  Promise.all outputs .then -> it.reduce (result, [operation, matches]) ->
     return operation result, matches
   , []
   # Return a promise for the matches.
